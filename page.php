@@ -1,7 +1,7 @@
 <?php get_header(); ?>
 
-<?php hu_get_content( 'tmpl/page-tmpl'); ?>
-
-<?php get_sidebar(); ?>
+<!-- start content container -->
+<?php get_template_part( 'content', 'page' ); ?>
+<!-- end content container -->
 
 <?php get_footer(); ?>

@@ -1,61 +1,54 @@
-<?php if ( post_password_required() ) { return; } ?>
+<?php
+/*
+ * If the current post is protected by a password and
+ * the visitor has not yet entered the password we will
+ * return early without loading the comments.
+ */
+if ( post_password_required() ) {
+	return;
+}
+if ( is_single() || is_page() ) :
+	?>
+	<div id="comments" class="comments-template">
+		<?php if ( have_comments() ) : ?>
+			<h4 id="comments">
+				<?php
+				$comments_number = get_comments_number();
+				if ( '1' === $comments_number ) {
+					/* translators: %s: post title */
+					printf( esc_html_x( 'One thought on &ldquo;%s&rdquo;', 'comments title', 'envo-storefront' ), esc_html( get_the_title() ) );
+				} else {
+					/* translators: 1: number of comments, 2: post title */
+					printf(	esc_html( _nx('%1$s thought on &ldquo;%2$s&rdquo;', '%1$s thoughts on &ldquo;%2$s&rdquo;', $comments_number, 'comments title', 'envo-storefront' ) ), esc_html( number_format_i18n( $comments_number ) ), esc_html( get_the_title() ) );
+				}
+				?>
+			</h4>
+			<ul class="commentlist list-unstyled">
+				<?php
+				wp_list_comments();
+				paginate_comments_links();
 
-<section id="comments" class="themeform">
+				if ( is_singular() ) {
+					wp_enqueue_script( 'comment-reply' );
+				}
+				?>
+			</ul>
+			<?php
+			comment_form();
+		else :
+			if ( comments_open() ) :
+				comment_form();
+			endif;
+		endif;
+		// If comments are closed and there are comments, let's leave a little note, shall we?
+		if ( !comments_open() && get_comments_number() && post_type_supports( get_post_type(), 'comments' ) ) :
+			?>
+			<p class="no-comments"><?php esc_html_e( 'Comments are closed.', 'envo-storefront' ); ?></p>
+			<?php
+		endif;
+		?>
+	</div>
+	<?php
 
-	<?php if ( have_comments() ) : global $wp_query; ?>
-
-		<h3 class="heading"><?php comments_number( __( 'No Responses', 'hueman' ), __( '1 Response', 'hueman' ), __( '% Responses', 'hueman' ) ); ?></h3>
-
-		<ul class="comment-tabs group">
-			<li class="active"><a href="#commentlist-container"><i class="far fa-comments"></i><?php _e( 'Comments', 'hueman' ); ?><span><?php echo count($wp_query->comments_by_type['comment']); ?></span></a></li>
-			<li><a href="#pinglist-container"><i class="fas fa-share"></i><?php _e( 'Pingbacks', 'hueman' ); ?><span><?php echo count($wp_query->comments_by_type['pings']); ?></span></a></li>
-		</ul>
-
-		<?php if ( ! empty( $comments_by_type['comment'] ) ) { ?>
-		<div id="commentlist-container" class="comment-tab">
-
-			<ol class="commentlist">
-				<?php wp_list_comments( sprintf( "avatar_size=%s&type=comment", apply_filters('hu_avatar_size', 48 ) ) ); ?>
-			</ol><!--/.commentlist-->
-
-			<?php if ( get_comment_pages_count() > 1 && get_option('page_comments') ) : ?>
-			<nav class="comments-nav group">
-				<div class="nav-previous"><?php previous_comments_link(); ?></div>
-				<div class="nav-next"><?php next_comments_link(); ?></div>
-			</nav><!--/.comments-nav-->
-			<?php endif; ?>
-
-		</div>
-		<?php } ?>
-
-		<?php if ( ! empty( $comments_by_type['pings'] ) ) { ?>
-		<div id="pinglist-container" class="comment-tab">
-
-			<ol class="pinglist">
-				<?php // not calling wp_list_comments twice, as it breaks pagination
-				$pings = $comments_by_type['pings'];
-				foreach ($pings as $comment) { ?>
-					<li class="ping">
-						<div class="ping-link"><?php comment_author_link($comment); ?></div>
-						<div class="ping-meta"><?php comment_date( get_option( 'date_format' ), $comment ); ?></div>
-						<div class="ping-content"><?php comment_text($comment); ?></div>
-					</li>
-				<?php } ?>
-			</ol><!--/.pinglist-->
-
-		</div>
-		<?php } ?>
-
-	<?php else: // if there are no comments yet ?>
-
-		<?php if (comments_open()) : ?>
-			<!-- comments open, no comments -->
-		<?php else : ?>
-			<!-- comments closed, no comments -->
-		<?php endif; ?>
-
-	<?php endif; ?>
-
-	<?php if ( comments_open() ) { comment_form(); } ?>
-
-</section><!--/#comments-->
+	 
+endif;
